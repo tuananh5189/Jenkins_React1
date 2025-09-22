@@ -1,39 +1,53 @@
 name: DevOps-GitHibActions
-on: push
+on: 
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
 jobs:
-  # Build Job
+  # Build Job - chạy cho cả push và pull request
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      
       - name: Install Node
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
+      
       - name: Install Dependencies
         run: npm install
+      
+      - name: Run Tests (optional)
+        run: npm test
+      
       - name: Build Project
         run: npm run build
+      
       - name: Upload artifact to enable deployment
         uses: actions/upload-artifact@v4
         with:
           name: production-files
           path: ./dist
-  # Deploy Job
+        if: github.event_name == 'push' # Chỉ upload artifact khi push
+
+  # Deploy Job - chỉ chạy khi push vào main/master
   deploy:
-    # Add a dependency to the build job
     needs: build
-    # Specify runner + deployment step
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: production-files
           path: ./dist
+      
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.CI_CD_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
