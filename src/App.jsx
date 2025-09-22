@@ -3,7 +3,7 @@ import "./App.css";
 function App() {
   return (
     <>
-      <h2>Implementing Continuous Integration and Continous Deployment</h2>
+      <h2>Implementing Continuous Integration and Continous Deployment v1</h2>
       <p>
         A basic React app to demonstrate how to implement CI/CD pipeline using
         GitHubActions
